@@ -26,6 +26,8 @@ class Pushbullet(object):
         self._session.auth = (self.api_key, "")
         self._session.headers.update(self._json_header)
 
+        self.sender = None
+
         self.refresh()
 
     def _get_data(self, url):
@@ -214,6 +216,9 @@ class Pushbullet(object):
 
         data.update(Pushbullet._recipient(device, contact, email))
 
+        if self.sender:
+            data.update({"source_device_iden": self.sender.device_iden})
+
         return self._push(data)
 
     def push_address(self, name, address, device=None, contact=None, email=None):
@@ -262,6 +267,9 @@ class Pushbullet(object):
         if r.status_code == requests.codes.ok:
             return r.json()
         raise PushError(r.text)
+
+    def set_sender(self, device):
+        self.sender = device
 
     def refresh(self):
         self._load_devices()
